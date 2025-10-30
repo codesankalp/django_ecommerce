@@ -1,16 +1,18 @@
 from pathlib import Path
+import os
 from typing import (List, Dict, Tuple, Any)
 
 from environ import Env
 
 env = Env()
-
-BASE_DIR: Path = Path(__file__).resolve().parent.parent
+BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
+print(os.path.join(BASE_DIR, '.env'))
+Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY: str = env.str('SECRET_KEY', 'default-secret-key')
-DEBUG: bool = False
-ALLOWED_HOSTS: List[str] = ['www.domain.com', ]
+DEBUG: bool = True
+ALLOWED_HOSTS: List[str] = ['*', ]
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
+X_FRAME_OPTIONS = 'ALLOWALL'
 ROOT_URLCONF: str = 'ecom.urls'
 WSGI_APPLICATION: str = 'ecom.wsgi.application'
 SITE_ID: int = 1
@@ -49,7 +51,7 @@ INSTALLED_APPS = [
 
 
 DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL', '')
-NOTIFY_EMAIL: str = env('NOTIFY_EMAIL', '')
+NOTIFY_EMAIL: str = env.str('NOTIFY_EMAIL', '')
 
 # Middleware
 # region
@@ -66,6 +68,7 @@ MIDDLEWARE: List[str] = [
 
 # Templates
 # region
+
 TEMPLATES: List[Dict[str, Any]] = [{
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
     'DIRS': [BASE_DIR / 'templates'],
@@ -83,16 +86,13 @@ TEMPLATES: List[Dict[str, Any]] = [{
 
 # Database
 # region
-DATABASES: Dict[str, Dict[str, Any]] = {
+DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env.str('DATABASE_NAME', 'django_ecommerce'),
-        'USER': env.str('DATABASE_USER', 'postgres'),
-        'PASSWORD': env.str('DATABASE_PASSWORD', '12345'),
-        'HOST': env.str('DATABASE_HOST', 'localhost'),
-        'PORT': env.str('DATABASE_PORT', '5432'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 # endregion
 
 
@@ -161,20 +161,4 @@ STRIPE_SECRET_KEY: str = env.str('STRIPE_SECRET_KEY', '')
 STRIPE_WEBHOOK_SECRET: str = env.str('STRIPE_WEBHOOK_SECRET', '')
 # endregion
 
-# Session
-# region
-SESSION_COOKIE_SECURE: bool = True
-# endregion
 
-# Secure
-# region
-SECURE_BROWSER_XSS_FILTER: bool = True
-SECURE_CONTENT_TYPE_NOSNIFF: bool = True
-SECURE_HSTS_INCLUDE_SUBDOMAINS: bool = True
-SECURE_HSTS_SECONDS: int = 31536000  # 365 days = 1 year
-SECURE_REDIRECT_EXEMPT: List[str] = []
-SECURE_SSL_REDIRECT: bool = True
-SECURE_PROXY_SSL_HEADER: Tuple[Tuple[str, str], ...] = (
-    ('HTTP_X_FORWARDED_PROTO', 'https'),
-)
-# endregion
